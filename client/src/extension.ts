@@ -26,7 +26,7 @@ export function activate(context: ExtensionContext) {
 	// Options to control the language client
 	let clientOptions: LanguageClientOptions = {
 		// Register the server for plain text documents
-		documentSelector: [{scheme: 'file', language: 'plaintext'}],
+		documentSelector: [{scheme: 'file', language: 'straps'}],
 		synchronize: {
 			// Synchronize the setting section 'languageServerExample' to the server
 			configurationSection: 'lspSample',
