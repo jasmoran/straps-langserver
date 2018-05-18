@@ -1,0 +1,193 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Straps",
+	"scopeName": "source.straps",
+	"patterns": [
+		{
+			"name": "meta.class.straps",
+			"begin": "\\b(class)\\s+(virtual\\s+)?([\\w<>]+)\\s*?(\\s<\\s+(\\w+)\\s*)?",
+			"beginCaptures": {
+				"1": { "name": "storage.type.class.straps" },
+				"2": { "name": "storage.modifier.virtual.straps" },
+				"3": { "name": "entity.name.class.straps" },
+				"5": { "name": "entity.other.inherited-class.straps" }
+			},
+			"patterns": [{ "include": "#typed-list" }],
+			"end": "(?<=\\{)"
+		},
+		{
+			"name": "meta.enum.straps",
+			"begin": "\\b(enum)\\s+([\\w<>]+)",
+			"beginCaptures": {
+				"1": { "name": "storage.type.enum.straps" },
+				"2": { "name": "entity.name.type.enum.straps" }
+			},
+			"patterns": [
+				{
+					"name": "meta.block.straps",
+					"begin": "\\{",
+					"patterns": [{
+						"name": "variable.other.enum.straps",
+						"match": "\\b\\w+\\b"
+					}],
+					"end": "\\}"
+				}
+			],
+			"end": "(?<=\\})"
+		},
+		{ "include": "#nasm" },
+		{ "include": "#function" },
+		{ "include": "#define" },
+		{ "include": "#keywords" },
+		{ "include": "#strings" },
+		{ "include": "#registers" },
+		{
+			"name": "comment.line.number-sign.straps",
+			"match": "#.*"
+		},
+		{
+			"name": "constant.numeric.integer.straps",
+			"match": "\\b[0-9]+\\b"
+		},
+		{
+			"name": "constant.language.boolean.straps",
+			"match": "\\b(true|false)\\b"
+		},
+		{
+			"name": "string.quoted.single.straps",
+			"match": "'\\\\?.'"
+		},
+		{
+			"name": "invalid.illegal.long-char.straps",
+			"match": "'(\\\\.{2,}|.{2,})'"
+		},
+		{
+			"name": "meta.function-call.straps",
+			"match": "\\b([\\w<>]+)\\(",
+			"captures": {
+				"1": { "name": "entity.name.function.straps" }
+			}
+		},
+		{
+			"name": "variable.language.this.straps",
+			"match": "\\bthis\\b"
+		},
+		{
+			"name": "variable.other.member.straps",
+			"match": "\\.[\\w<>]+\\b(?!\\()"
+		},
+		{
+			"name": "storage.type.var.straps",
+			"match": "\\bvar\\b"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [
+				{
+					"name": "keyword.control.straps",
+					"match": "\\b(for|loop|return|break)\\b"
+				},
+				{
+					"name": "keyword.control.conditional.straps",
+					"match": "\\b(if|else|case)\\b"
+				},
+				{
+					"name": "keyword.control.import.straps",
+					"begin": "\\binclude\\s+",
+					"patterns": [{ "include": "#strings" }],
+					"end": "(?<=\")"
+				},
+				{
+					"name": "keyword.operator.assignment.straps",
+					"match": "(?<![\\+\\-!<>=])=(?![\\+\\-!<>=])"
+				},
+				{
+					"name": "keyword.operator.arithmetic.straps",
+					"match": "\\+[=\\+]?|-[=-]?|\\*|/"
+				},
+				{
+					"name": "keyword.operator.bitwise.straps",
+					"match": "<<|>>"
+				},
+				{
+					"name": "keyword.operator.logical.straps",
+					"match": "!=?|<=?|>=?|==|&&|\\|\\|"
+				},
+				{
+					"name": "keyword.operator.word.straps",
+					"match": "\\bin\\b"
+				}
+			]
+		},
+		"strings": {
+			"name": "string.quoted.double.straps",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.straps",
+					"match": "\\\\."
+				}
+			]
+		},
+		"registers": {
+			"name": "constant.language.register.straps",
+			"match": "\\b(rax|rbx|rcx|rdx|rsp|rbp|rsi|rdi|r12|r13)\\b",
+			"patterns": []
+		},
+		"typed-list": {
+			"name": "meta.parens.typed-list.straps",
+			"begin": "\\(",
+			"patterns": [
+				{
+					"name": "meta.typed-variable.straps",
+					"match": "\\b([\\w<>]+)\\s+(\\w+)\\b",
+					"captures": {
+						"1": { "name": "entity.name.type.straps" },
+						"2": { "name": "variable.parameter.straps" }
+					}
+				},
+				{
+					"name": "punctuation.seperator.comma.straps",
+					"match": ",\\s*"
+				}
+			],
+			"end": "\\)"
+		},
+		"function": {
+			"name": "meta.function.straps",
+			"begin": "(func)\\s+([\\w<>]+)\\s+(\\w+)\\s*(?=\\()",
+			"beginCaptures": {
+				"1": { "name": "storage.type.function.straps" },
+				"2": { "name": "entity.name.type.straps" },
+				"3": { "name": "entity.name.function.straps" }
+			},
+			"patterns": [{"include": "#typed-list"}],
+			"end": "(?<=\\)[^(])"
+		},
+		"nasm": {
+			"name": "meta.function-call.straps",
+			"begin": "\\b(nasm)\\(",
+			"beginCaptures": {
+				"1": {
+					"name": "support.function.nasm.straps"
+				}
+			},
+			"end": "\\)",
+			"patterns": [{
+				"include": "#strings"
+			}]
+		},
+		"define": {
+			"name": "meta.preprocessor.define.straps",
+			"begin": "\\b(define)\\s+(\\w+)",
+			"beginCaptures": {
+				"1": { "name": "keyword.control.other.define" },
+				"2": { "name": "entity.name.constant.straps" }
+			},
+			"patterns": [{ "include": "#strings" }],
+			"end": "(?<=\")"
+		}
+	}
+}

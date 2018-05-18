@@ -1,22 +1,22 @@
 {
-	"name": "lsp-sample",
-	"description": "VSCode part of a language server",
-	"author": "Microsoft Corporation",
+	"name": "straps",
+	"displayName": "straps",
+	"description": "Straps",
 	"license": "MIT",
 	"version": "0.0.1",
-	"publisher": "vscode",
+	"publisher": "Jack",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/Microsoft/vscode-extension-samples"
 	},
 	"engines": {
-		"vscode": "^1.22.0"
+		"vscode": "^1.23.0"
 	},
 	"categories": [
-		"Other"
+		"Programming Languages"
 	],
 	"activationEvents": [
-		"onLanguage:plaintext"
+		"onLanguage:straps"
 	],
 	"main": "./out/src/extension",
 	"contributes": {
@@ -42,7 +42,18 @@
 					"description": "Traces the communication between VSCode and the language server."
 				}
 			}
-		}
+		},
+		"languages": [{
+			"id": "straps",
+			"aliases": ["Straps", "straps"],
+			"extensions": [".straps",".str",".v10",".generic"],
+			"configuration": "./language-configuration.json"
+		}],
+		"grammars": [{
+			"language": "straps",
+			"scopeName": "source.straps",
+			"path": "./syntaxes/straps.tmLanguage.json"
+		}]
 	},
 	"scripts": {
 		"vscode:prepublish": "tsc -p ./",
