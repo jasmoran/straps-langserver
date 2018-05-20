@@ -1,4 +1,4 @@
-import { Connection, TextDocumentPositionParams, CompletionItem, TextDocumentChangeEvent, CompletionItemKind, Diagnostic, DiagnosticSeverity } from "vscode-languageserver";
+import { Connection, TextDocumentPositionParams, CompletionItem, TextDocumentChangeEvent, CompletionItemKind, Diagnostic, DiagnosticSeverity, InsertTextFormat } from "vscode-languageserver";
 import { Dict, Issue, FuncMeta, ReportMeta } from "./types";
 import * as yaml from 'js-yaml';
 import * as fs from 'fs';
@@ -38,7 +38,7 @@ export class Straps {
 		const file = textDocumentPosition.textDocument.uri.replace(/^.*\/src\//, 'src/')
 		const cursorLine = textDocumentPosition.position.line + 1;
 		const cursorChar = textDocumentPosition.position.character;
-		
+
 		const fileErrs = this.issues[file];
 		if (fileErrs) {
 			const err = fileErrs.find(err =>
@@ -48,12 +48,26 @@ export class Straps {
 				err.options !== undefined
 			)
 			if (err && err.options) {
-				return err.options.map(v => (<CompletionItem>{
-					label: v,
-					kind: CompletionItemKind.Variable
-					// insertText: `${v}(\${1:var})$0`,
-					// insertTextFormat: InsertTextFormat.Snippet
-				}));
+				return err.options.map(v => {
+					if (typeof v === 'string') {
+						return {
+							label: v,
+							kind: CompletionItemKind.Field,
+							insertText: v,
+							insertTextFormat: InsertTextFormat.PlainText
+						}
+					} else {
+						const args = v.args || [];
+						const meth = v.name + '(' + args.map(a => a.type + ' ' + a.name).join(', ') + ')'
+						return <CompletionItem>{
+							label: meth,
+							detail: `func ${v.type} ${meth}`,
+							kind: CompletionItemKind.Method,
+							insertText: v.name + '(' + args.map((a, ix) => `\${${ix + 1}:${a.name}}`).join(', ') + ')$0',
+							insertTextFormat: InsertTextFormat.Snippet
+						}
+					}
+				});
 			}
 		}
 		
