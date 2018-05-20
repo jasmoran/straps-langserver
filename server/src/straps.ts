@@ -23,15 +23,15 @@ export class Straps {
 		warning: DiagnosticSeverity.Warning
 	}
 
-	private errorLog(stdin: string, stdout: string, stderr: string) {
+	private errorLog(_stdin: string, _stdout: string, _stderr: string) {
 		const path = `${__dirname}/log_${new Date().getTime()}`;
 		console.error(`Writing error logs to: ${path}`)
-		fs.writeFile(`${path}_input.txt`,  stdin,  Straps.nothing);
-		fs.writeFile(`${path}_output.txt`, stdout, Straps.nothing);
-		fs.writeFile(`${path}_error.txt`,  stderr, Straps.nothing);
+		// fs.writeFile(`${path}_input.txt`,  stdin,  Straps.nothing);
+		// fs.writeFile(`${path}_output.txt`, stdout, Straps.nothing);
+		// fs.writeFile(`${path}_error.txt`,  stderr, Straps.nothing);
 	}
 
-	private addStdlib = (src: string) => (/include "src\/stdlib\/stdlib.v10"/.test(src)) ? src : `include "src/stdlib/stdlib.v10"\n${src}`
+	// private addStdlib = (src: string) => (/include "src\/stdlib\/stdlib.v10"/.test(src)) ? src : `include "src/stdlib/stdlib.v10"\n${src}`
 
 	onCompletion = (textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
 		console.log(Object.keys(this.issues))
@@ -76,13 +76,14 @@ export class Straps {
 	}
 
 	onDidChangeContent = (change: TextDocumentChangeEvent) => {
-		const text = this.addStdlib(change.document.getText());
-		console.log('Beginnings: ' + text.substr(0, 20));
+		const text = change.document.getText();
 		const path = change.document.uri.replace(/^.*\/src\//, 'src/');
 		
 		// Open a child compiler process
 		console.log('Analysing ' + path)
 		const process = cp.exec(`ubuntu -c "cd /home/jack/ubuntu/straps; bin/straps_dev ${path} xxx"`, (_error, stdout, stderr) => {
+			fs.writeFile(`${__dirname}/output.yml`,  stdout,  Straps.nothing);
+
 			// Parse returned report
 			try {
 				var report = yaml.safeLoad(stdout) as ReportMeta;

@@ -5,7 +5,7 @@
 'use strict';
 
 import {
-	IPCMessageReader, IPCMessageWriter, createConnection, IConnection, TextDocuments, InitializeResult, CompletionItem
+	IPCMessageReader, IPCMessageWriter, createConnection, TextDocuments, InitializeResult, CompletionItem
 } from 'vscode-languageserver';
 import { Straps } from './straps';
 
