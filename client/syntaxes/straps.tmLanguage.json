@@ -5,7 +5,7 @@
 	"patterns": [
 		{
 			"name": "meta.class.straps",
-			"begin": "\\b(class)\\s+(virtual\\s+)?([\\w<>]+)\\s*?(\\s<\\s+(\\w+)\\s*)?",
+			"begin": "\\b(class)\\s+(virtual\\s+)?([\\w<>?]+)\\s*?(\\s<\\s+([\\w<>?]+)\\s*)?",
 			"beginCaptures": {
 				"1": { "name": "storage.type.class.straps" },
 				"2": { "name": "storage.modifier.virtual.straps" },
@@ -17,7 +17,7 @@
 		},
 		{
 			"name": "meta.enum.straps",
-			"begin": "\\b(enum)\\s+([\\w<>]+)",
+			"begin": "\\b(enum)\\s+([\\w<>?]+)",
 			"beginCaptures": {
 				"1": { "name": "storage.type.enum.straps" },
 				"2": { "name": "entity.name.type.enum.straps" }
@@ -28,7 +28,7 @@
 					"begin": "\\{",
 					"patterns": [{
 						"name": "variable.other.enum.straps",
-						"match": "\\b\\w+\\b"
+						"match": "\\b[\\w<>?]\\b"
 					}],
 					"end": "\\}"
 				}
@@ -63,7 +63,7 @@
 		},
 		{
 			"name": "meta.function-call.straps",
-			"match": "\\b([\\w<>]+)\\(",
+			"match": "\\b([\\w<>?]+)\\(",
 			"captures": {
 				"1": { "name": "entity.name.function.straps" }
 			}
@@ -74,7 +74,7 @@
 		},
 		{
 			"name": "variable.other.member.straps",
-			"match": "\\.[\\w<>]+\\b(?!\\()"
+			"match": "\\.[\\w<>?]+\\b(?!\\()"
 		},
 		{
 			"name": "storage.type.var.straps",
@@ -86,7 +86,7 @@
 			"patterns": [
 				{
 					"name": "keyword.control.straps",
-					"match": "\\b(for|loop|return|break)\\b"
+					"match": "\\b(for|loop|return|break|next)\\b"
 				},
 				{
 					"name": "keyword.control.conditional.straps",
@@ -142,7 +142,7 @@
 			"patterns": [
 				{
 					"name": "meta.typed-variable.straps",
-					"match": "\\b([\\w<>]+)\\s+(\\w+)\\b",
+					"match": "\\b([\\w<>?]+)\\s+([\\w<>?]+)\\b",
 					"captures": {
 						"1": { "name": "entity.name.type.straps" },
 						"2": { "name": "variable.parameter.straps" }
@@ -157,7 +157,7 @@
 		},
 		"function": {
 			"name": "meta.function.straps",
-			"begin": "(func)\\s+([\\w<>]+)\\s+(\\w+)\\s*(?=\\()",
+			"begin": "(func)\\s+([\\w<>?]+)\\s+([\\w<>?]+)\\s*(?=\\()",
 			"beginCaptures": {
 				"1": { "name": "storage.type.function.straps" },
 				"2": { "name": "entity.name.type.straps" },
