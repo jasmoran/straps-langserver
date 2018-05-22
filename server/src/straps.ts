@@ -23,12 +23,12 @@ export class Straps {
 		warning: DiagnosticSeverity.Warning
 	}
 
-	private errorLog(_stdin: string, _stdout: string, _stderr: string) {
+	private errorLog(stdin: string, stdout: string, stderr: string) {
 		const path = `${__dirname}/log_${new Date().getTime()}`;
 		console.error(`Writing error logs to: ${path}`)
-		// fs.writeFile(`${path}_input.txt`,  stdin,  Straps.nothing);
-		// fs.writeFile(`${path}_output.txt`, stdout, Straps.nothing);
-		// fs.writeFile(`${path}_error.txt`,  stderr, Straps.nothing);
+		fs.writeFile(`${path}_input.txt`,  stdin,  Straps.nothing);
+		fs.writeFile(`${path}_output.txt`, stdout, Straps.nothing);
+		fs.writeFile(`${path}_error.txt`,  stderr, Straps.nothing);
 	}
 
 	// private addStdlib = (src: string) => (/include "src\/stdlib\/stdlib.v10"/.test(src)) ? src : `include "src/stdlib/stdlib.v10"\n${src}`
@@ -49,22 +49,22 @@ export class Straps {
 			)
 			if (err && err.options) {
 				return err.options.map(v => {
-					if (typeof v === 'string') {
-						return {
-							label: v,
-							kind: CompletionItemKind.Field,
-							insertText: v,
-							insertTextFormat: InsertTextFormat.PlainText
-						}
-					} else {
-						const args = v.args || [];
-						const meth = v.name + '(' + args.map(a => a.type + ' ' + a.name).join(', ') + ')'
+					if (v.args) {
+						const meth = v.name + '(' + v.args.map(a => a.type + ' ' + a.name).join(', ') + ')'
 						return <CompletionItem>{
 							label: meth,
 							detail: `func ${v.type} ${meth}`,
 							kind: CompletionItemKind.Method,
-							insertText: v.name + '(' + args.map((a, ix) => `\${${ix + 1}:${a.name}}`).join(', ') + ')$0',
+							insertText: v.name + '(' + v.args.map((a, ix) => `\${${ix + 1}:${a.name}}`).join(', ') + ')$0',
 							insertTextFormat: InsertTextFormat.Snippet
+						}
+					} else {
+						return <CompletionItem>{
+							label: v.name,
+							detail: `${v.type} ${v.name}`,
+							kind: CompletionItemKind.Field,
+							insertText: v.name,
+							insertTextFormat: InsertTextFormat.PlainText
 						}
 					}
 				});

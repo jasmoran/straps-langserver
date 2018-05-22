@@ -7,10 +7,7 @@ export interface Pos {
 export interface TypedIdentifier {
 	name: string
 	type: string
-}
-
-export interface TypedFunction extends TypedIdentifier {
-	args: TypedIdentifier[]
+	args?: TypedIdentifier[]
 }
 
 export interface Issue {
@@ -18,7 +15,7 @@ export interface Issue {
 	start: Pos;
 	end: Pos;
 	message: string;
-	options?: (string | TypedFunction)[];
+	options?: TypedIdentifier[];
 };
 
 export interface FuncMeta {
