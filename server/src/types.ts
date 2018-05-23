@@ -27,8 +27,8 @@ export interface FuncMeta {
 };
 
 export interface ReportMeta {
-	issues: Issue[];
-	functions: FuncMeta[];
+	issues?: Issue[];
+	functions?: FuncMeta[];
 };
 
 export type Dict<T> = { [k: string]: T };

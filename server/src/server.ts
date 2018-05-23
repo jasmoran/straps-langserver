@@ -5,7 +5,7 @@
 'use strict';
 
 import {
-	IPCMessageReader, IPCMessageWriter, createConnection, TextDocuments, InitializeResult, CompletionItem
+	IPCMessageReader, IPCMessageWriter, createConnection, TextDocuments, InitializeResult, CompletionItem 
 } from 'vscode-languageserver';
 import { Straps } from './straps';
 
@@ -49,7 +49,21 @@ connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
-documents.onDidChangeContent(straps.onDidChangeContent);
+var first = true;
+documents.onDidChangeContent(params => {
+	const uri = params.document.uri;
+
+	if (first) {
+		straps.runReport(uri, params.document.getText());
+		first = false;
+	} else {
+		straps.sendDiagnostics(uri);
+	}
+});
+
+connection.onDidChangeTextDocument(params => {
+	straps.runReport(params.textDocument.uri, params.contentChanges[0].text)
+});
 
 // Listen on the connection
 connection.listen();

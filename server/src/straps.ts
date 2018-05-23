@@ -1,4 +1,4 @@
-import { Connection, TextDocumentPositionParams, CompletionItem, TextDocumentChangeEvent, CompletionItemKind, Diagnostic, DiagnosticSeverity, InsertTextFormat } from "vscode-languageserver";
+import { Connection, TextDocumentPositionParams, CompletionItem, CompletionItemKind, Diagnostic, DiagnosticSeverity, InsertTextFormat } from "vscode-languageserver";
 import { Dict, Issue, FuncMeta, ReportMeta } from "./types";
 import * as yaml from 'js-yaml';
 import * as fs from 'fs';
@@ -89,54 +89,67 @@ export class Straps {
 		}))
 	}
 
-	onDidChangeContent = (change: TextDocumentChangeEvent) => {
-		const text = change.document.getText();
-		const path = change.document.uri.replace(/^.*\/src\//, 'src/');
+	runReport = (uri: string, text: string) => {
+		const path = uri.replace(/^.*\/src\//, 'src/');
+		const remote_path = `C:/ubu/straps/${path}`;
 		
-		// Open a child compiler process
-		console.log('Analysing ' + path)
-		const process = cp.exec(`ubuntu -c "cd /home/jack/ubuntu/straps; bin/straps_dev ${path} xxx"`, (_error, stdout, stderr) => {
-			fs.writeFile(`${__dirname}/output.yml`,  stdout,  Straps.nothing);
+		console.log(`Writing: ${remote_path}`)
+		fs.writeFile(remote_path, text, () => {
+			console.log(`Analysing: ${path}`)
 
-			// Parse returned report
-			try {
-				var report = yaml.safeLoad(stdout) as ReportMeta;
-				if (!report.functions || !report.issues) throw 'Missing functions or issues'
-			} catch (e) {
-				this.errorLog(text, stdout, stderr)
-				return
-			}
-		
-			// Sort functions
-			const raw_funcs = report.functions.sort((b, a) => a.start.line - b.start.line || a.start.char - b.start.char);
-		
-			// Group functions and warnings by file
-			this.funcs = Straps.groupByFile(raw_funcs);
-			if (report.issues) {
-				this.issues = Straps.groupByFile(report.issues);
-			} else {
-				this.issues = {} as Dict<Issue[]>;
-			}
+			// Open a child compiler process
+			cp.exec(`ubuntu -c "cd /home/jack/ubuntu/straps; bin/straps_report src/language/v10.v10 xxx"`, { maxBuffer: 2048 * 1024 }, (_error, stdout, stderr) => {
+				console.log(`Finished: ${path}`)
+				fs.writeFile(`${__dirname}/output.yml`,  stdout,  Straps.nothing);
+	
+				// Parse returned report
+				try {
+					var report = yaml.safeLoad(stdout) as ReportMeta;
+					if (!report.issues) throw 'Missing functions or issues'
+				} catch (e) {
+					this.errorLog(text, stdout, stderr)
+					return
+				}
+				
+				// Process issues
+				if (report.issues) {
+					this.issues = Straps.groupByFile(report.issues);
+				} else {
+					this.issues = {} as Dict<Issue[]>;
+				}
+				
+				// Send issues to user
+				this.sendDiagnostics(uri);
 
-			const fileIssues = this.issues[path] || [];
-			if (!fileIssues) return;
-			
-			const diagnostics: Diagnostic[] = fileIssues.map(issue => ({
-				severity: Straps.severity[issue.level],
-				range: {
-					start: { line: issue.start.line - 1, character: issue.start.char - 1 },
-					end: { line: (issue.end.line || issue.start.line) - 1, character: (issue.end.char || issue.start.char + 2) }
-				},
-				message: issue.message,
-				source: 'ex'
-			}));
-			
-			// Send the computed diagnostics to VSCode.
-			this.connection.sendDiagnostics({ uri: change.document.uri, diagnostics });
+				// Process function locals
+				if (report.functions) {
+					const raw_funcs = report.functions.sort((b, a) => a.start.line - b.start.line || a.start.char - b.start.char);
+					this.funcs = Straps.groupByFile(raw_funcs);
+				} else {
+					this.funcs = {} as Dict<FuncMeta[]>;
+				}
+			}).stdin.end();
 		});
+	}
 
-		// Send changed source to the compiler
-		process.stdin.write(text);
-		process.stdin.end();
+	sendDiagnostics = (uri: string) => {
+		const path = uri.replace(/^.*\/src\//, 'src/');
+		console.log(`Sending diagnostics: ${path}`)
+
+		const fileIssues = this.issues[path] || [];
+		if (!fileIssues) return;
+
+		const diagnostics: Diagnostic[] = fileIssues.map(issue => ({
+			severity: Straps.severity[issue.level],
+			range: {
+				start: { line: issue.start.line - 1, character: issue.start.char - 1 },
+				end: { line: (issue.end.line || issue.start.line) - 1, character: (issue.end.char || issue.start.char + 2) }
+			},
+			message: issue.message,
+			source: 'ex'
+		}));
+		
+		// Send the computed diagnostics to VSCode.
+		this.connection.sendDiagnostics({ uri, diagnostics });
 	}
 }
