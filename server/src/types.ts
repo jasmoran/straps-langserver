@@ -1,7 +1,6 @@
 export interface Pos {
-	file: string;
 	line: number;
-	char: number;
+	character: number;
 };
 
 export interface TypedIdentifier {
@@ -11,24 +10,12 @@ export interface TypedIdentifier {
 }
 
 export interface Issue {
-	level: 'error' | 'warning';
+	file: string;
 	start: Pos;
 	end: Pos;
+	level: 'error' | 'warning';
 	message: string;
 	options?: TypedIdentifier[];
-};
-
-export interface FuncMeta {
-	start: Pos;
-	end?: Pos;
-	generator?: string;
-	function: string;
-	variables: string[];
-};
-
-export interface ReportMeta {
-	issues?: Issue[];
-	functions?: FuncMeta[];
 };
 
 export type Dict<T> = { [k: string]: T };
